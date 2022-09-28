@@ -17,8 +17,14 @@ public class Controller {
     @Autowired
     FirmRepository firmRepository;
 
+    @GetMapping("/test")
+    public String testPoint(){
+        return "Ok working";
+    }
+
     @GetMapping("/getfirm/{id}")
     public ResponseEntity getFirm(@PathVariable int id){
+        System.out.println("get request received");
         Firm newFirm = firmRepository.getFirm(id);
         return ResponseEntity.ok().body(newFirm);
     }
