@@ -8,6 +8,7 @@ public class CacheApplication {
 
 	public static void main(String[] args) {
 			SpringApplication.run(CacheApplication.class, args);
+		System.out.println("app started");
 
 	}
 
