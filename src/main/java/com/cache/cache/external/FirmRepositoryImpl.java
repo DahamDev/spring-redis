@@ -15,7 +15,7 @@ public class FirmRepositoryImpl implements FirmRepository {
 
     @Override
     public void saveFirm(Firm firm) {
-        hashOperations.putIfAbsent(hashReference, firm.getId(), firm);
+        hashOperations.put(hashReference, firm.getId(), firm);
     }
 
 

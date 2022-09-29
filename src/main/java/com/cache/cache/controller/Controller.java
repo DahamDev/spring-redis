@@ -3,14 +3,12 @@ package com.cache.cache.controller;
 import com.cache.cache.external.Firm;
 import com.cache.cache.external.FirmRepository;
 import com.cache.cache.process.ReadData;
-import org.apache.catalina.core.ApplicationContext;
-import org.apache.coyote.Response;
+import com.cache.cache.process.WriteData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.security.PermitAll;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("firm")
@@ -18,8 +16,13 @@ public class Controller {
 
     @Autowired
     FirmRepository firmRepository;
-    int initialDataCountRedis=1000;
-    int readingCount=1000;
+    @Value("${redisapp.initialcount}")
+    int initialDataCountRedis;
+
+    @Value("${redisapp.readingcount}")
+    int readingCount;
+    @Value("${redisapp.writing.datacount}")
+    int writingDatacount;
 
     @GetMapping("/test")
     public String testPoint(){
@@ -43,7 +46,7 @@ public class Controller {
     public String insertToRedis(){
 
         long startTime=System.currentTimeMillis();
-        generateInitialData(startTime);
+        generateInitialData();
         return "Ok";
     }
 
@@ -73,24 +76,45 @@ public class Controller {
         return "Ok";
     }
 
+    @PostMapping("startreadwrite")
+    public String startReadingWriting(){
 
-    private void generateInitialData(long startTime) {
-        for(int count =0;count<initialDataCountRedis;count++){
-            Firm newFirm = new Firm();
-            newFirm.setId(count);
-            newFirm.setName("Some Random Firm");
+        long startTime=System.currentTimeMillis();
 
-            long start=System.currentTimeMillis();
-            firmRepository.saveFirm(newFirm);
-            long end=System.currentTimeMillis();
+        ReadData readData = new ReadData(readingCount,initialDataCountRedis,firmRepository);
+        WriteData writeData = new WriteData(writingDatacount,readingCount,firmRepository);
 
-            writeLog("Normal Thread", startTime,end-start,"Firm");
-        }
+        Thread thread1 = new Thread(readData);
+        thread1.setName("Thread-1");
+        thread1.start();
+
+        Thread thread2 = new Thread(readData);
+        thread2.setName("Thread-2");
+        thread2.start();
+
+        Thread thread3 = new Thread(readData);
+        thread3.setName("Thread-3");
+        thread3.start();
+
+        Thread thread4 = new Thread(readData);
+        thread4.setName("Thread-4");
+        thread4.start();
+
+        Thread thread5 = new Thread(writeData);
+        thread5.setName("Thread-5");
+        thread5.start();
+
+        return "Ok";
     }
 
 
-    private void writeLog(String threadName, long startTime,long latency,String data){
-        double timeStamp= Math.floor((System.currentTimeMillis()-startTime)/1000);
-        System.out.println(threadName +"|"+timeStamp+ "|"+ latency+"|"+data);
+    private void generateInitialData() {
+
+        WriteData writeData = new WriteData(writingDatacount,initialDataCountRedis,firmRepository);
+        System.out.println("Generated initial data");
+        writeData.run();
     }
+
+
+
 }
