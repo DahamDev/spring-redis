@@ -22,7 +22,7 @@ public class Controller {
     @Value("${redisapp.readingcount}")
     int readingCount;
     @Value("${redisapp.writing.datacount}")
-    int writingDatacount;
+    int readWriteDataCount;
 
     @GetMapping("/test")
     public String testPoint(){
@@ -54,7 +54,7 @@ public class Controller {
     public String startReading(){
         long startTime=System.currentTimeMillis();
 
-        ReadData readData = new ReadData(readingCount,initialDataCountRedis,firmRepository);
+        ReadData readData = new ReadData(readingCount,readWriteDataCount,firmRepository);
 
         Thread thread1 = new Thread(readData);
         thread1.setName("Thread-1");
@@ -81,8 +81,8 @@ public class Controller {
 
         long startTime=System.currentTimeMillis();
 
-        ReadData readData = new ReadData(readingCount,initialDataCountRedis,firmRepository);
-        WriteData writeData = new WriteData(writingDatacount,readingCount,firmRepository);
+        ReadData readData = new ReadData(readingCount, readWriteDataCount,firmRepository);
+        WriteData writeData = new WriteData(readWriteDataCount,readingCount,firmRepository);
 
         Thread thread1 = new Thread(readData);
         thread1.setName("Thread-1");
@@ -110,7 +110,7 @@ public class Controller {
 
     private void generateInitialData() {
 
-        WriteData writeData = new WriteData(writingDatacount,initialDataCountRedis,firmRepository);
+        WriteData writeData = new WriteData(readWriteDataCount,initialDataCountRedis,firmRepository);
         System.out.println("Generated initial data");
         writeData.run();
     }

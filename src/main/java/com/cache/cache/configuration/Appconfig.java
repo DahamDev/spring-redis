@@ -39,11 +39,10 @@ public class Appconfig {
 
     @Bean(name="redisTemplate")
     public RedisTemplate<String, Firm> redisTemplate() {
+
         RedisTemplate<String, Firm> template = new RedisTemplate<>();
         template.setConnectionFactory(jedisConnectionFactory());
-
         Jackson2JsonRedisSerializer<Firm> jsonRedisSerializer = new Jackson2JsonRedisSerializer<Firm>(Firm.class);
-
         template.setDefaultSerializer(jsonRedisSerializer);
         return template;
     }
